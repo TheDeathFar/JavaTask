@@ -1,0 +1,29 @@
+{
+  "playerId" : 18146,
+  "nickname" : "RandomPlayer#18146",
+  "progresses" : [ {
+    "id" : 814603,
+    "playerId" : 18146,
+    "resourceId" : 69856758,
+    "score" : 3,
+    "maxScore" : 150
+  }, {
+    "id" : 814602,
+    "playerId" : 18146,
+    "resourceId" : 1078979096,
+    "score" : 2,
+    "maxScore" : 500
+  }, {
+    "id" : 814600,
+    "playerId" : 18146,
+    "resourceId" : 576756884,
+    "score" : 0,
+    "maxScore" : 900
+  }, {
+    "id" : 814601,
+    "playerId" : 18146,
+    "resourceId" : 315464543,
+    "score" : 1,
+    "maxScore" : 1000
+  } ]
+}
