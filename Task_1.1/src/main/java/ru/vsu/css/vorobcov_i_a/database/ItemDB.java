@@ -21,8 +21,8 @@ public class ItemDB {
     private static final String READ_ALL_ITEMS_BY_PLAYER_ID = "SELECT * FROM items " +
             "join players_items pi on items.id = pi.item_id " +
             "WHERE player_id = ?;";
-    private static final String UPDATE_ITEM_SQL = "UPDATE items SET (count, level, resourceid) = (?, ?, ?) where id = ?;";
-    private static final String DELETE_ITEM_SQL = "DELETE FROM items WHERE id = ? cascade;";
+    private static final String UPDATE_ITEM_SQL = "UPDATE items SET (count, level, resource_id) = (?, ?, ?) where id = ?;";
+    private static final String DELETE_ITEM_SQL = "DELETE FROM items WHERE id = ? ;";
 
 
     public void update(Item item) throws SQLException {

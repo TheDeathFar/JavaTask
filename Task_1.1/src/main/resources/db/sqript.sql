@@ -17,7 +17,7 @@ CREATE TABLE progresses(
     player_id int8 references players(player_id),
     resource_id int8,
     score int4,
-    maxScore int4,
+    maxScore int4
 );
 
 CREATE TABLE currencies(

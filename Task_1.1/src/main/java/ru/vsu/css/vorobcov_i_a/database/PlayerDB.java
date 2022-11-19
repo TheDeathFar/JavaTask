@@ -18,6 +18,7 @@ public class PlayerDB {
     private final ProgressDB progressDB;
     private final CurrencyDB currencyDB;
     private final ItemDB itemsDB;
+    
     public PlayerDB(){
         progressDB = new ProgressDB();
         currencyDB = new CurrencyDB();
@@ -28,73 +29,61 @@ public class PlayerDB {
     private static final String INSERT_PLAYERS = "INSERT INTO players(player_id, nickname) VALUES (?, ?)";
     private static final String INSERT_PLAYERS_CURRENCIES = "INSERT INTO players_currencies(player_id, currency_id) VALUES (?, ?)";
     private static final String INSERT_PLAYERS_ITEM_MAP = "INSERT INTO players_items(player_id, item_id) values(?, ?);";
-    private static final String READ_ALL_ID_PLAYERS = "SELECT player_id FROM PLAYER";
+    private static final String READ_ALL_ID_PLAYERS = "SELECT player_id FROM PLAYERS";
     private static final String READ_PLAYER_BY_ID = "SELECT * FROM PLAYERS";
-    private static final String UPDATE_PLAYERS_SQL = "UPDATE players SET nickname = ? where playerid = ?;";
-    private static final String DELETE_PLAYER_SQL = "DELETE FROM players WHERE playerId = ? cascade;";
-    private static final String DELETE_FROM_PLAYER_ITEM_MAP_SQL = "DELETE FROM player_item_map where playerId = ? and itemid = ?;";
-    private static final String DELETE_FROM_PLAYER_CURRENCY_MAP_SQL = "DELETE FROM player_currency_map where playerid = ? and currencyid = ?;";
+    private static final String UPDATE_PLAYERS_SQL = "UPDATE players SET nickname = ? where player_id = ?;";
+    private static final String DELETE_PLAYER_SQL = "DELETE FROM players WHERE player_id = ?;";
+    private static final String DELETE_ALL_FROM_PLAYER_ITEM_MAP_SQL = "DELETE FROM players_items where player_id = ?;";
+    private static final String DELETE_ALL_FROM_PLAYER_CURRENCY_MAP_SQL = "DELETE FROM players_currencies where player_id = ?;";
+    private static final String TRUNCATE_ALL_CASCADE = "truncate table players_currencies cascade; " +
+            "truncate table players_items cascade; " +
+            "truncate table players cascade;";
 
-    /*public void update(Player newPlayer) throws SQLException {
-        Player oldPlayer = readAndConvert(dbConnection, newPlayer.getId());
-        Map<String, Currency> oldPlayerCurrencies = oldPlayer.getCurrencies();
-        Map<String, Item> oldPlayerItems = oldPlayer.getItems();
-        Map<Long, Progress> oldPlayerProgresses = oldPlayer.getProgresses().stream().collect(Collectors.toMap(Progress::getId, Function.identity()));
-        //проверяем существующие
-        for(var s : newPlayer.getItems().entrySet()){
-            if(oldPlayerItems.containsKey(s.getKey())){
-                ItemDB.update(dbConnection, s.getValue());
-                oldPlayerItems.remove(s.getKey());
-            }else{
-                ItemDB.save(dbConnection, s.getValue());
-            }
-        }
-        for(var s : oldPlayerItems.entrySet()){
-            deleteFromPlayerItemMap(dbConnection, newPlayer.getPlayerId(), s.getKey());
-        }
-        for(var s : newPlayer.getCurrencies().entrySet()){
-            if(oldPlayerCurrencies.containsKey(s.getKey())){
-                CurrencyDB.update(dbConnection, s.getValue());
-                oldPlayerCurrencies.remove(s.getKey());
-            }else{
-                CurrencyDB.save(dbConnection, s.getValue());
-            }
-        }
-        for(var s : oldPlayerCurrencies.entrySet()){
-            deleteFromPlayerCurrencyMap(dbConnection, newPlayer.getPlayerId(), s.getKey());
-        }
-        for(var s : newPlayer.getProgresses()){
-            if(oldPlayerCurrencies.containsKey(s.getId())){
-                ProgressDB.update(dbConnection, s);
-                oldPlayerProgresses.remove(s.getId());
-            }else{
-                ProgressDB.save(dbConnection, s);
-            }
-        }
-        for(var s : oldPlayerProgresses.entrySet()){
-            ProgressDB.deleteById(s.getKey());
-        }
 
+    public void update(Long id, Player newPlayer) throws SQLException {
         PreparedStatement preparedStatement = dbConnection.prepareStatement(UPDATE_PLAYERS_SQL);
-        preparedStatement.setString(1, newPlayer.getNickname());
-        preparedStatement.setLong(2, newPlayer.getPlayerId());
+        preparedStatement.setLong(1, id);
+        preparedStatement.executeUpdate();
+        deleteAllPlayerItemsByPlayerId(id);
+        deleteAllPlayerCurrenciesByPlayerId(id);
+        progressDB.deleteByPlayerId(id);
+        for(var curr : newPlayer.getCurrencies().values()){
+            currencyDB.save(curr);
+            saveCurrenciesPlayerMap(newPlayer.getPlayerId(), curr.getId());
+
+        }
+        for(var item : newPlayer.getItems().values()) {
+            itemsDB.save(item);
+            saveItemsPlayerMap(newPlayer.getPlayerId(), item.getId());
+        }
+        progressDB.saveAll(newPlayer.getProgresses());
+    }
+
+    public void deleteALl() throws SQLException {
+        PreparedStatement preparedStatement = dbConnection.prepareStatement(TRUNCATE_ALL_CASCADE);
         preparedStatement.executeUpdate();
     }
 
-    public void deleteFromPlayerItemMap(Connection connection, Long playerId, String ItemId) throws SQLException {
-        PreparedStatement preparedStatement = connection.prepareStatement(DELETE_FROM_PLAYER_ITEM_MAP_SQL);
-        preparedStatement.setLong(1, playerId);
-        preparedStatement.setString(2, ItemId);
+    public void delete(Long id) throws SQLException {
+        deleteAllPlayerCurrenciesByPlayerId(id);
+        deleteAllPlayerCurrenciesByPlayerId(id);
+        progressDB.deleteByPlayerId(id);
+        PreparedStatement preparedStatement = dbConnection.prepareStatement(DELETE_PLAYER_SQL);
+        preparedStatement.setLong(1, id);
         preparedStatement.executeUpdate();
     }
 
-    public void deleteFromPlayerCurrencyMap(Connection connection, Long playerId, String currencyId) throws SQLException {
-        PreparedStatement preparedStatement = connection.prepareStatement(DELETE_FROM_PLAYER_CURRENCY_MAP_SQL);
+    private void deleteAllPlayerItemsByPlayerId(Long playerId) throws SQLException {
+        PreparedStatement preparedStatement = dbConnection.prepareStatement(DELETE_ALL_FROM_PLAYER_ITEM_MAP_SQL);
         preparedStatement.setLong(1, playerId);
-        preparedStatement.setString(2, currencyId);
         preparedStatement.executeUpdate();
     }
-     */
+
+    private void deleteAllPlayerCurrenciesByPlayerId(Long playerId) throws SQLException {
+        PreparedStatement preparedStatement = dbConnection.prepareStatement(DELETE_ALL_FROM_PLAYER_CURRENCY_MAP_SQL);
+        preparedStatement.setLong(1, playerId);
+        preparedStatement.executeUpdate();
+    }
 
     public void save(Player player) throws SQLException {
         PreparedStatement preparedStatement = dbConnection.prepareStatement(INSERT_PLAYERS);
@@ -106,12 +95,10 @@ public class PlayerDB {
             saveCurrenciesPlayerMap(player.getPlayerId(), curr.getId());
 
         }
-
         for(var item : player.getItems().values()) {
             itemsDB.save(item);
             saveItemsPlayerMap(player.getPlayerId(), item.getId());
         }
-
         progressDB.saveAll(player.getProgresses());
     }
 

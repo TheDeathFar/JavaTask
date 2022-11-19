@@ -11,7 +11,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 
-import static ru.vsu.css.vorobcov_i_a.Main.ConsoleParams.CrudType.*;
+import static ru.vsu.css.vorobcov_i_a.Main.ConsoleParams.Crud.*;
 
 public class Main {
 
@@ -20,17 +20,18 @@ public class Main {
     @Data
     @NoArgsConstructor
     static class ConsoleParams{
-        enum CrudType{
+        enum Crud{
             GET,
             UPDATE,
             DELETE,
             SAVE
         }
-        private  CrudType crudType;
+        private  Crud crud;
         private  Long id;
         private  String inputFile;
         private  String outputFile;
-        private  boolean needHelp;
+        private  boolean needHelp = false;
+        private  boolean isExit = false;
     }
     // -cd GET -id 3 -iF players.json -oF output.txt
     private static ConsoleParams parsParams(String[] args){
@@ -45,22 +46,42 @@ public class Main {
                         break;
                     }else{
                         String crudTypeString = args[i+1];
-                        ConsoleParams.CrudType crudType;
+                        ConsoleParams.Crud crudType;
                         try {
-                            crudType = ConsoleParams.CrudType.valueOf(crudTypeString);
+                            crudType = ConsoleParams.Crud.valueOf(crudTypeString);
                         }catch (IllegalArgumentException e){
                             consoleParams.needHelp = true;
                             break;
                         }
-                        consoleParams.crudType = crudType;
+                        consoleParams.crud = crudType;
                         i++;
                     }
+                } else if(args[i].equals("-iF")){
+                    if(i + 1 >= args.length){
+                        consoleParams.needHelp = true;
+                        break;
+                    }else{
+                        consoleParams.inputFile = args[i+1];
+                        i++;
+                    }
+                } else if(args[i].equals("-oF")){
+                    if(i + 1 >= args.length){
+                        consoleParams.needHelp = true;
+                        break;
+                    }else{
+                        consoleParams.outputFile = args[i+1];
+                        i++;
+                    }
+                }else if(args[i].equals("--help")){
+                    consoleParams.needHelp = true;
+                }else if(args[i].equals("--exit")){
+                    consoleParams.isExit = true;
                 }
             }
         }
-        if(consoleParams.crudType == null){
+        if(consoleParams.crud == null){
             consoleParams.needHelp = true;
-        }else if((UPDATE == consoleParams.getCrudType() || SAVE == consoleParams.getCrudType()) && consoleParams.inputFile == null){
+        }else if((UPDATE == consoleParams.getCrud() || ConsoleParams.Crud.SAVE == consoleParams.getCrud()) && consoleParams.inputFile == null){
             consoleParams.needHelp = true;
         }
 
@@ -69,55 +90,71 @@ public class Main {
 
 
     @SneakyThrows
-    public static void main(String[] args) throws IOException {
-        ConsoleParams consoleParams = parsParams(args);
-
-        if(consoleParams.isNeedHelp()){
-            showHelpInfo();
-        }else{
-            Long id = consoleParams.getId();
-            if(consoleParams.crudType == GET){
-                if(id == null){
-                    //read all and if has file to file, if not - to console
-                    List<Player> allPlayers = playerDB.readAll();
-                    String outString = PlayerUtil.convertToString(allPlayers);
-                    if(consoleParams.getOutputFile() == null){
-                        System.out.println(outString);
-                    }else{
-                        FileOutputStream outputStream = new FileOutputStream(consoleParams.getOutputFile());
-                        byte[] strToBytes = outString.getBytes();
-                        outputStream.write(strToBytes);
-                        outputStream.close();
-                    }
-                }else{
-                    Player player = playerDB.readById(id);
-                    String stringPlayer = PlayerUtil.convertToString(player);
-
-                    if(consoleParams.getOutputFile() == null){
-                        System.out.println(stringPlayer);
-                    }else{
-                        FileOutputStream outputStream = new FileOutputStream(consoleParams.getOutputFile());
-                        byte[] strToBytes = stringPlayer.getBytes();
-                        outputStream.write(strToBytes);
-                        outputStream.close();
-                    }
-                    //read specific by id and if has file to file, if not - to console
-                }
-
-            }else if(consoleParams.crudType == UPDATE){
-                if(id == null){
-                    //update all - read from file
-                }else{
-                    //update specific by id - read from file
-                }
-            }else if(consoleParams.crudType == DELETE){
-                if(id == null){
-                    //delete all
-                }else{
-                    //delete specific by id
-                }
+    public static void main(String[] args) {
+        while (true){
+            ConsoleParams consoleParams = parsParams(args);
+            if(consoleParams.isNeedHelp()){
+                showHelpInfo();
+            }else if(consoleParams.isExit()){
+                break;
             }else{
-                //save operation from file
+                Long id = consoleParams.getId();
+                if(consoleParams.crud == GET){
+                    if(id == null){
+                        //read all and if has file to file, if not - to console
+                        List<Player> allPlayers = playerDB.readAll();
+                        String outString = PlayerUtil.convertToString(allPlayers);
+                        if(consoleParams.getOutputFile() == null){
+                            System.out.println(outString);
+                        }else{
+                            try(FileOutputStream outputStream = new FileOutputStream(consoleParams.getOutputFile())){
+                                byte[] strToBytes = outString.getBytes();
+                                outputStream.write(strToBytes);
+                            }
+                        }
+                    }else{
+                        Player player = playerDB.readById(id);
+                        String stringPlayer = PlayerUtil.convertToString(player);
+                        if(consoleParams.getOutputFile() == null){
+                            System.out.println(stringPlayer);
+                        }else{
+                            try(FileOutputStream outputStream = new FileOutputStream(consoleParams.getOutputFile())) {
+                                byte[] strToBytes = stringPlayer.getBytes();
+                                outputStream.write(strToBytes);
+                            }
+                        }
+                    }
+
+                }else if(consoleParams.crud == UPDATE){
+                    if(id == null){
+                        showHelpInfo();
+                        //update all - read from file
+                    }else{
+                        if(consoleParams.getInputFile() == null){
+                            showHelpInfo();
+                        }else{
+                            Player player = PlayerUtil.readOneFromFile(consoleParams.getInputFile());
+                            playerDB.update(id, player);
+                        }
+                        //update specific by id - read from file
+                    }
+                }else if(consoleParams.crud == DELETE){
+                    if(id == null){
+                        //delete all
+                        playerDB.deleteALl();
+                    }else{
+                        //delete specific by id
+                        playerDB.delete(id);
+                    }
+                }else{
+                    if(consoleParams.getInputFile() == null){
+                        showHelpInfo();
+                    }else{
+                        List<Player> players = PlayerUtil.readFromFile(consoleParams.getInputFile());
+                        playerDB.saveAll(players);
+                    }
+                    //save operation from file
+                }
             }
         }
     }

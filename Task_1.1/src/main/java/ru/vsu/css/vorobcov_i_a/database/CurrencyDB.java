@@ -21,8 +21,8 @@ public class CurrencyDB {
     private static final String READ_ALL_CURRENCIES_BY_PLAYER_ID = "SELECT currencies.* FROM currencies " +
             "join players_currencies on currencies.id = players_currencies.currency_id " +
             "WHERE player_id = ?;";
-    private static final String UPDATE_CURRENCY_SQL = "UPDATE currencies SET (resourceid, name, count) = (?, ?, ?) where id = ?;";
-    private static final String DELETE_CURRENCY_SQL = "DELETE FROM currencies WHERE id = ? cascade;";
+    private static final String UPDATE_CURRENCY_SQL = "UPDATE currencies SET (resource_id, name, count) = (?, ?, ?) where id = ?;";
+    private static final String DELETE_CURRENCY_SQL = "DELETE FROM currencies WHERE id = ? ;";
 
     public void update(Currency item) throws SQLException {
         PreparedStatement preparedStatement = dbConnection.prepareStatement(UPDATE_CURRENCY_SQL);

@@ -20,8 +20,9 @@ public class ProgressDB {
             " (?, ?, ?, ?, ?);";
     private static final String READ_PROGRESSES_SQL = "SELECT * FROM progresses;";
     private static final String READ_PROGRESSES_BY_PLAYER_ID_SQL = "SELECT * FROM progresses where player_id = ?;";
-    private static final String UPDATE_PROGRESS_SQL = "UPDATE progresses SET (playerid, resourceid, score, maxscore) = (?, ?, ?, ?) where id = ?;";
-    private static final String DELETE_PROGRESS_SQL = "DELETE FROM progresses WHERE id = ? cascade;";
+    private static final String UPDATE_PROGRESS_SQL = "UPDATE progresses SET (player_id, resource_id, score, maxscore) = (?, ?, ?, ?) where id = ?;";
+    private static final String DELETE_PROGRESS_SQL = "DELETE FROM progresses WHERE id = ?;";
+    private static final String DELETE_PROGRESS_SQL_BY_PLAYER_ID = "DELETE FROM progresses WHERE player_id = ?;";
 
     public void update(Progress item) throws SQLException {
         PreparedStatement preparedStatement = dbConnection.prepareStatement(UPDATE_PROGRESS_SQL);
@@ -35,6 +36,12 @@ public class ProgressDB {
 
     public void deleteById(Long id) throws SQLException {
         PreparedStatement preparedStatement = dbConnection.prepareStatement(DELETE_PROGRESS_SQL);
+        preparedStatement.setLong(1, id);
+        preparedStatement.executeUpdate();
+    }
+
+    public void deleteByPlayerId(Long id) throws SQLException {
+        PreparedStatement preparedStatement = dbConnection.prepareStatement(DELETE_PROGRESS_SQL_BY_PLAYER_ID);
         preparedStatement.setLong(1, id);
         preparedStatement.executeUpdate();
     }

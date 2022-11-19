@@ -22,6 +22,12 @@ public class PlayerUtil {
     }
 
     @SneakyThrows
+    public static Player readOneFromFile(String path){
+        InputStream resourceAsStream = PlayerUtil.class.getClassLoader().getResourceAsStream(path);
+        return objectMapper.readValue(resourceAsStream, Player.class);
+    }
+
+    @SneakyThrows
     public static String convertToString(Player player){
         return objectMapper.writer().writeValueAsString(player);
     }
