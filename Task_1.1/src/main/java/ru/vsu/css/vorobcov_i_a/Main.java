@@ -10,7 +10,6 @@ import ru.vsu.css.vorobcov_i_a.util.PlayerUtil;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
-import java.util.Scanner;
 
 import static ru.vsu.css.vorobcov_i_a.Main.ConsoleParams.Crud.*;
 
@@ -152,7 +151,7 @@ public class Main {
                         if(consoleParams.getInputFile() == null){
                             showHelpInfo();
                         }else{
-                            Player player = PlayerUtil.readOneFromFile(consoleParams.getInputFile());
+                            Player player = PlayerUtil.readOnePlayerFromFile(consoleParams.getInputFile());
                             playerDB.update(id, player);
                         }
                         //update specific by id - read from file
@@ -169,7 +168,7 @@ public class Main {
                     if(consoleParams.getInputFile() == null){
                         showHelpInfo();
                     }else{
-                        List<Player> players = PlayerUtil.readFromFile(consoleParams.getInputFile());
+                        List<Player> players = PlayerUtil.readPlayersFromFile(consoleParams.getInputFile());
                         playerDB.saveAll(players);
                     }
                     //save operation from file

@@ -23,7 +23,7 @@ public class PlayersUtilTest {
 
     @Test
     public void readTest(){
-        List<Player> allPlayers = PlayerUtil.readFromFile("players.json");
+        List<Player> allPlayers = PlayerUtil.readPlayersFromFile("players.json");
         assertEquals(10_000, allPlayers.size());
     }
 
@@ -36,7 +36,7 @@ public class PlayersUtilTest {
 
     @Test
     public void saveDataBaseTest() throws SQLException {
-        List<Player> readPlayers = PlayerUtil.readFromFile("players.json");
+        List<Player> readPlayers = PlayerUtil.readPlayersFromFile("players.json");
         //take save first player
         PlayerDB playerDB = new PlayerDB();
         playerDB.save(readPlayers.get(0));
@@ -44,7 +44,7 @@ public class PlayersUtilTest {
 
     @Test
     public void saveAllPlayersTest() throws SQLException {
-        List<Player> readPlayers = PlayerUtil.readFromFile("players.json");
+        List<Player> readPlayers = PlayerUtil.readPlayersFromFile("players.json");
         PlayerDB playerDB = new PlayerDB();
         playerDB.saveAll(readPlayers);
     }
@@ -52,7 +52,7 @@ public class PlayersUtilTest {
 
     @Test
     public void readDataBaseTest() throws SQLException {
-        List<Player> readPlayers = PlayerUtil.readFromFile("players.json");
+        List<Player> readPlayers = PlayerUtil.readPlayersFromFile("players.json");
         Player player = readPlayers.get(0);
         playerDB.save(player);
         Player playerFromDb = playerDB.readById(player.getPlayerId());
@@ -66,7 +66,7 @@ public class PlayersUtilTest {
 
     @Test
     public void readDataAllBaseTest() throws SQLException {
-        List<Player> readPlayers = PlayerUtil.readFromFile("players.json");
+        List<Player> readPlayers = PlayerUtil.readPlayersFromFile("players.json");
         //прокачка из кэша в БД
         playerDB.saveAll(readPlayers);
         //прокачка из БД в кэш
@@ -74,7 +74,5 @@ public class PlayersUtilTest {
         assertEquals(readPlayers.size(), playersFromDb.size());
 
     }
-
-
 
 }
