@@ -1,9 +1,11 @@
+import lombok.SneakyThrows;
 import org.junit.Before;
 import org.junit.Test;
 import ru.vsu.css.vorobcov_i_a.util.PlayerUtil;
 import ru.vsu.css.vorobcov_i_a.database.PlayerDB;
 import ru.vsu.css.vorobcov_i_a.models.Player;
 
+import java.io.FileOutputStream;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
@@ -62,6 +64,19 @@ public class PlayersUtilTest {
         assertEquals(player.getItems().size(), playerFromDb.getItems().size());
         assertEquals(player.getCurrencies().size(), playerFromDb.getCurrencies().size());
     }
+
+    @SneakyThrows
+    @Test
+    public void writeToFileTest(){
+        List<Player> readPlayers = PlayerUtil.readPlayersFromFile("players.json");
+        List<Player> firstTen = readPlayers.subList(0, 10);
+        String outString = PlayerUtil.convertToString(firstTen);
+        try(FileOutputStream outputStream = new FileOutputStream("first_ten.json")){
+            byte[] strToBytes = outString.getBytes();
+            outputStream.write(strToBytes);
+        }
+    }
+
 
 
     @Test
