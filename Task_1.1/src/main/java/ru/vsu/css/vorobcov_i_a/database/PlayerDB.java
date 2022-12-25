@@ -30,30 +30,34 @@ public class PlayerDB {
     private static final String INSERT_PLAYERS_CURRENCIES = "INSERT INTO players_currencies(player_id, currency_id) VALUES (?, ?)";
     private static final String INSERT_PLAYERS_ITEM_MAP = "INSERT INTO players_items(player_id, item_id) values(?, ?);";
     private static final String READ_ALL_ID_PLAYERS = "SELECT player_id FROM PLAYERS";
-    private static final String READ_PLAYER_BY_ID = "SELECT * FROM PLAYERS";
+    private static final String READ_PLAYER_BY_ID = "SELECT * FROM PLAYERS where player_id = ?";
     private static final String UPDATE_PLAYERS_SQL = "UPDATE players SET nickname = ? where player_id = ?;";
     private static final String DELETE_PLAYER_SQL = "DELETE FROM players WHERE player_id = ?;";
     private static final String DELETE_ALL_FROM_PLAYER_ITEM_MAP_SQL = "DELETE FROM players_items where player_id = ?;";
     private static final String DELETE_ALL_FROM_PLAYER_CURRENCY_MAP_SQL = "DELETE FROM players_currencies where player_id = ?;";
-    private static final String TRUNCATE_ALL_CASCADE = "truncate table players_currencies cascade; " +
-            "truncate table players_items cascade; " +
+    private static final String TRUNCATE_ALL_CASCADE = "truncate table currencies cascade; " +
+            "truncate table items cascade; " +
             "truncate table players cascade;";
-
+    private static final String IS_ITEM_EXISTS_SQL = "SELECT EXISTS(SELECT * FROM items WHERE id = ?);";
+    private static final String IS_CURRENCY_EXISTS_SQL = "SELECT EXISTS(SELECT * FROM currencies WHERE id = ?);";
 
     public void update(Long id, Player newPlayer) throws SQLException {
         PreparedStatement preparedStatement = dbConnection.prepareStatement(UPDATE_PLAYERS_SQL);
-        preparedStatement.setLong(1, id);
+        preparedStatement.setString(1, newPlayer.getNickname());
+        preparedStatement.setLong(2, id);
         preparedStatement.executeUpdate();
         deleteAllPlayerItemsByPlayerId(id);
         deleteAllPlayerCurrenciesByPlayerId(id);
         progressDB.deleteByPlayerId(id);
         for(var curr : newPlayer.getCurrencies().values()){
-            currencyDB.save(curr);
+            if(!isCurrencyExisits(curr.getId()))
+                currencyDB.save(curr);
             saveCurrenciesPlayerMap(newPlayer.getPlayerId(), curr.getId());
 
         }
         for(var item : newPlayer.getItems().values()) {
-            itemsDB.save(item);
+            if(!isItemExisits(item.getId()))
+                itemsDB.save(item);
             saveItemsPlayerMap(newPlayer.getPlayerId(), item.getId());
         }
         progressDB.saveAll(newPlayer.getProgresses());
@@ -64,6 +68,23 @@ public class PlayerDB {
         preparedStatement.executeUpdate();
     }
 
+    private boolean isItemExisits(Long id) throws SQLException {
+        PreparedStatement preparedStatement = dbConnection.prepareStatement(IS_ITEM_EXISTS_SQL);
+        preparedStatement.setLong(1, id);
+        preparedStatement.execute();
+        ResultSet resultSet = preparedStatement.getResultSet();
+        resultSet.next();
+        return resultSet.getBoolean(1);
+    }
+
+    private boolean isCurrencyExisits(Long id) throws SQLException {
+        PreparedStatement preparedStatement = dbConnection.prepareStatement(IS_CURRENCY_EXISTS_SQL);
+        preparedStatement.setLong(1, id);
+        preparedStatement.execute();
+        ResultSet resultSet = preparedStatement.getResultSet();
+        resultSet.next();
+        return resultSet.getBoolean(1);
+    }
     public void delete(Long id) throws SQLException {
         deleteAllPlayerCurrenciesByPlayerId(id);
         deleteAllPlayerCurrenciesByPlayerId(id);
@@ -117,6 +138,7 @@ public class PlayerDB {
 
     public Player readById(Long id) throws SQLException {
         PreparedStatement preparedStatement = dbConnection.prepareStatement(READ_PLAYER_BY_ID);
+        preparedStatement.setLong(1, id);
         preparedStatement.execute();
         ResultSet resultSet = preparedStatement.getResultSet();
         resultSet.next();

@@ -10,6 +10,7 @@ import ru.vsu.css.vorobcov_i_a.util.PlayerUtil;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.Scanner;
 
 import static ru.vsu.css.vorobcov_i_a.Main.ConsoleParams.Crud.*;
 
@@ -56,7 +57,22 @@ public class Main {
                         consoleParams.crud = crudType;
                         i++;
                     }
-                } else if(args[i].equals("-iF")){
+                }else if(args[i].equals("-id")){
+                    if(i + 1 >= args.length){
+                        consoleParams.needHelp = true;
+                        break;
+                    }else{
+                        long id;
+                        try{
+                            id = Long.parseLong(args[i+1]);
+                        }catch (NumberFormatException e){
+                            consoleParams.needHelp = true;
+                            break;
+                        }
+                        consoleParams.id = id;
+                    }
+                }
+                else if(args[i].equals("-iF")){
                     if(i + 1 >= args.length){
                         consoleParams.needHelp = true;
                         break;
@@ -91,7 +107,10 @@ public class Main {
 
     @SneakyThrows
     public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
         while (true){
+            System.out.println("Next command: ");
+            args = sc.nextLine().split(" ");
             ConsoleParams consoleParams = parsParams(args);
             if(consoleParams.isNeedHelp()){
                 showHelpInfo();

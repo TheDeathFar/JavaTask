@@ -1,6 +1,7 @@
 package ru.vsu.css.vorobcov_i_a.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import ru.vsu.css.vorobcov_i_a.models.Player;
@@ -14,6 +15,9 @@ import java.util.stream.Collectors;
 
 public class PlayerUtil {
     private final static ObjectMapper objectMapper = new ObjectMapper();
+    static {
+        objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    }
 
     @SneakyThrows
     public static List<Player> readFromFile(String path){
@@ -29,11 +33,11 @@ public class PlayerUtil {
 
     @SneakyThrows
     public static String convertToString(Player player){
-        return objectMapper.writer().writeValueAsString(player);
+        return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(player);
     }
     @SneakyThrows
     public static String convertToString(List<Player> player){
-        return objectMapper.writer().writeValueAsString(player);
+        return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(player);
     }
 
 
