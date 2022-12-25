@@ -16,13 +16,23 @@ public class PlayerUtil {
     private final static ObjectMapper objectMapper = new ObjectMapper();
 
     @SneakyThrows
-    public static List<Player> readFromFile(String path){
-        InputStream resourceAsStream = PlayerUtil.class.getClassLoader().getResourceAsStream(path);
-        return objectMapper.readValue(resourceAsStream, new TypeReference<>() {});
+    public static List<Player> readAllPlayersFromString(String playerString){
+        return  objectMapper.readValue(playerString, new TypeReference<List<Player>>() {});
     }
 
     @SneakyThrows
-    public static Player readOneFromFile(String path){
+    public static Player readPlayerFromString(String playerString){
+        return objectMapper.readValue(playerString, new TypeReference<List<Player>>() {});
+    }
+
+    @SneakyThrows
+    public static List<Player> readPlayersFromFile(String path){
+        InputStream resourceAsStream = PlayerUtil.class.getClassLoader().getResourceAsStream(path);
+        return objectMapper.readValue(resourceAsStream, new TypeReference<List<Player>>() {});
+    }
+
+    @SneakyThrows
+    public static Player readOnePlayerFromFile(String path){
         InputStream resourceAsStream = PlayerUtil.class.getClassLoader().getResourceAsStream(path);
         return objectMapper.readValue(resourceAsStream, Player.class);
     }
