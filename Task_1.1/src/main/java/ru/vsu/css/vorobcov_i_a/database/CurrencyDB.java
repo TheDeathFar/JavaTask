@@ -53,12 +53,14 @@ public class CurrencyDB {
         preparedStatement.setLong(1, id);
         preparedStatement.execute();
         ResultSet resultSet = preparedStatement.getResultSet();
-        Currency currency = new Currency();
-        resultSet.next();
-        currency.setId(resultSet.getLong(1));
-        currency.setCount(resultSet.getInt(4));
-        currency.setName(resultSet.getString(3));
-        currency.setResourceId(resultSet.getLong(2));
+        Currency currency = null;
+        if(resultSet.next()){
+            currency = new Currency();
+            currency.setId(resultSet.getLong(1));
+            currency.setCount(resultSet.getInt(4));
+            currency.setName(resultSet.getString(3));
+            currency.setResourceId(resultSet.getLong(2));
+        }
         return currency;
     }
 

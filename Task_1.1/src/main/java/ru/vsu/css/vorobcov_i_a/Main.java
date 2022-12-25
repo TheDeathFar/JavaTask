@@ -10,6 +10,7 @@ import ru.vsu.css.vorobcov_i_a.util.PlayerUtil;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.Scanner;
 
 import static ru.vsu.css.vorobcov_i_a.Main.ConsoleParams.Crud.*;
 
@@ -39,58 +40,65 @@ public class Main {
         if(args.length == 0){
             consoleParams.needHelp = true;
         }else{
-            for(int i = 0;i < args.length; i++){
-                if(args[i].equals("-cd")){
-                    if(i + 1 >= args.length){
-                        consoleParams.needHelp = true;
-                        break;
-                    }else{
-                        String crudTypeString = args[i+1];
-                        ConsoleParams.Crud crudType;
-                        try {
-                            crudType = ConsoleParams.Crud.valueOf(crudTypeString);
-                        }catch (IllegalArgumentException e){
+            label:
+            for(int i = 0; i < args.length; i++){
+                switch (args[i]) {
+                    case "-cd":
+                        if (i + 1 >= args.length) {
                             consoleParams.needHelp = true;
-                            break;
+                            break label;
+                        } else {
+                            String crudTypeString = args[i + 1];
+                            ConsoleParams.Crud crudType;
+                            try {
+                                crudType = ConsoleParams.Crud.valueOf(crudTypeString);
+                            } catch (IllegalArgumentException e) {
+                                consoleParams.needHelp = true;
+                                break;
+                            }
+                            consoleParams.crud = crudType;
+                            i++;
                         }
-                        consoleParams.crud = crudType;
-                        i++;
-                    }
-                }else if(args[i].equals("-id")){
-                    if(i + 1 >= args.length){
-                        consoleParams.needHelp = true;
                         break;
-                    }else{
-                        long id;
-                        try{
-                            id = Long.parseLong(args[i+1]);
-                        }catch (NumberFormatException e){
+                    case "-id":
+                        if (i + 1 >= args.length) {
                             consoleParams.needHelp = true;
-                            break;
+                            break label;
+                        } else {
+                            long id;
+                            try {
+                                id = Long.parseLong(args[i + 1]);
+                            } catch (NumberFormatException e) {
+                                consoleParams.needHelp = true;
+                                break;
+                            }
+                            consoleParams.id = id;
                         }
-                        consoleParams.id = id;
-                    }
-                }
-                else if(args[i].equals("-iF")){
-                    if(i + 1 >= args.length){
+                        break;
+                    case "-iF":
+                        if (i + 1 >= args.length) {
+                            consoleParams.needHelp = true;
+                            break label;
+                        } else {
+                            consoleParams.inputFile = args[i + 1];
+                            i++;
+                        }
+                        break;
+                    case "-oF":
+                        if (i + 1 >= args.length) {
+                            consoleParams.needHelp = true;
+                            break label;
+                        } else {
+                            consoleParams.outputFile = args[i + 1];
+                            i++;
+                        }
+                        break;
+                    case "--help":
                         consoleParams.needHelp = true;
                         break;
-                    }else{
-                        consoleParams.inputFile = args[i+1];
-                        i++;
-                    }
-                } else if(args[i].equals("-oF")){
-                    if(i + 1 >= args.length){
-                        consoleParams.needHelp = true;
+                    case "--exit":
+                        consoleParams.isExit = true;
                         break;
-                    }else{
-                        consoleParams.outputFile = args[i+1];
-                        i++;
-                    }
-                }else if(args[i].equals("--help")){
-                    consoleParams.needHelp = true;
-                }else if(args[i].equals("--exit")){
-                    consoleParams.isExit = true;
                 }
             }
         }

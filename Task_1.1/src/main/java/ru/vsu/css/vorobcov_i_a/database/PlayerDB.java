@@ -52,6 +52,8 @@ public class PlayerDB {
         for(var curr : newPlayer.getCurrencies().values()){
             if(!isCurrencyExisits(curr.getId()))
                 currencyDB.save(curr);
+            else
+                
             saveCurrenciesPlayerMap(newPlayer.getPlayerId(), curr.getId());
 
         }
@@ -87,7 +89,7 @@ public class PlayerDB {
     }
     public void delete(Long id) throws SQLException {
         deleteAllPlayerCurrenciesByPlayerId(id);
-        deleteAllPlayerCurrenciesByPlayerId(id);
+        deleteAllPlayerItemsByPlayerId(id);
         progressDB.deleteByPlayerId(id);
         PreparedStatement preparedStatement = dbConnection.prepareStatement(DELETE_PLAYER_SQL);
         preparedStatement.setLong(1, id);
@@ -141,22 +143,24 @@ public class PlayerDB {
         preparedStatement.setLong(1, id);
         preparedStatement.execute();
         ResultSet resultSet = preparedStatement.getResultSet();
-        resultSet.next();
-        Player player = new Player();
-        player.setPlayerId(resultSet.getLong(1));
-        player.setNickname(resultSet.getString(2));
-        Map<String, Currency> playerCurrencies = new HashMap<>();
-        currencyDB.readByPlayerId(id).forEach(currency -> {
-            playerCurrencies.put(String.valueOf(currency.getId()), currency);
-        });
-        player.setCurrencies(playerCurrencies);
-        Map<String, Item> playerItems = new HashMap<>();
-        itemsDB.readByPlayerId(id).forEach(item -> {
-            playerItems.put(String.valueOf(item.getId()), item);
-        });
-        player.setItems(playerItems);
-        player.setProgresses(progressDB.getAllByPlayerId(id));
-        return player;
+        if(resultSet.next()){
+            Player player = new Player();
+            player.setPlayerId(resultSet.getLong(1));
+            player.setNickname(resultSet.getString(2));
+            Map<String, Currency> playerCurrencies = new HashMap<>();
+            currencyDB.readByPlayerId(id).forEach(currency -> {
+                playerCurrencies.put(String.valueOf(currency.getId()), currency);
+            });
+            player.setCurrencies(playerCurrencies);
+            Map<String, Item> playerItems = new HashMap<>();
+            itemsDB.readByPlayerId(id).forEach(item -> {
+                playerItems.put(String.valueOf(item.getId()), item);
+            });
+            player.setItems(playerItems);
+            player.setProgresses(progressDB.getAllByPlayerId(id));
+            return player;
+        }
+        return null;
     }
 
     public void saveAll(Collection<Player> players) throws SQLException {

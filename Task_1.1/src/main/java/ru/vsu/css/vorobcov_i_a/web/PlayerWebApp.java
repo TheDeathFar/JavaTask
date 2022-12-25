@@ -19,6 +19,8 @@ import java.util.List;
 public class PlayerWebApp extends HttpServlet {
     private final static PlayerDB playerDB = new PlayerDB();
 
+
+
     @SneakyThrows
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -36,6 +38,7 @@ public class PlayerWebApp extends HttpServlet {
             resp.sendError(400);
         }
         out.flush();
+        resp.setStatus(HttpServletResponse.SC_OK);
     }
 
     @SneakyThrows
@@ -44,6 +47,7 @@ public class PlayerWebApp extends HttpServlet {
         String stringPlayers = readDataFromRequest(req);
         List<Player> players = PlayerUtil.readAllPlayersFromString(stringPlayers);
         playerDB.saveAll(players);
+        resp.setStatus(HttpServletResponse.SC_OK);
     }
 
     @SneakyThrows
@@ -59,6 +63,7 @@ public class PlayerWebApp extends HttpServlet {
             Player player = PlayerUtil.readPlayerFromString(stringPlayer);
             playerDB.update(id, player);
         }
+        resp.setStatus(HttpServletResponse.SC_OK);
     }
 
     @SneakyThrows
@@ -74,6 +79,7 @@ public class PlayerWebApp extends HttpServlet {
         }else{
             resp.sendError(400);
         }
+        resp.setStatus(HttpServletResponse.SC_OK);
     }
 
     private String readDataFromRequest(HttpServletRequest req){

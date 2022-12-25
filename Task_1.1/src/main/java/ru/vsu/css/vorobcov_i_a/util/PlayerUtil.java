@@ -1,5 +1,7 @@
 package ru.vsu.css.vorobcov_i_a.util;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,6 +19,9 @@ public class PlayerUtil {
     private final static ObjectMapper objectMapper = new ObjectMapper();
     static {
         objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+        objectMapper.setVisibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE);
+        objectMapper.setVisibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.NONE);
     }
 
     @SneakyThrows
@@ -26,7 +31,7 @@ public class PlayerUtil {
 
     @SneakyThrows
     public static Player readPlayerFromString(String playerString){
-        return objectMapper.readValue(playerString, new TypeReference<List<Player>>() {});
+        return objectMapper.readValue(playerString, Player.class);
     }
 
     @SneakyThrows
